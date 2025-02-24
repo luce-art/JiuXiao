@@ -10,6 +10,7 @@ uniform sampler2D shadowcolor0;
 uniform sampler2D lightmap;
 uniform sampler2D noisetex;
 uniform int renderStage;
+uniform int worldTime;
 uniform float viewHeight;
 uniform float viewWidth;
 uniform vec3 upPosition;

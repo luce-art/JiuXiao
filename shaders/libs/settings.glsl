@@ -1,5 +1,6 @@
 /*
 const int colortex0Format = RGB16;
+const int colortex4Format = RGB16;
 */
 
 // LIGHTING

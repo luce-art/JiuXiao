@@ -7,11 +7,11 @@ in vec2 texCoord;
 // Settings
 #include "/libs/settings.glsl"
 /* DRAWBUFFERS:0 */
-layout (location = 0) out vec4 outColor;
+layout (location = 0) out vec4 colortex0Out;
 const vec3 blocklightColor = vec3(1.0, 0.5, 0.08);
 const vec3 skylightColor = vec3(0.05, 0.15, 0.3);
 const vec3 sunlightColor = vec3(1.0);
-const vec3 ambientColor = vec3(0.1);
+const vec3 ambientColor = vec3(0.03);
 
 // Functions
 #include "/libs/functions.glsl"
@@ -63,7 +63,7 @@ vec3 getSoftShadow(vec4 shadowClipPos){
 
 // Main
 void main() {
-    outColor = texture(colortex0, texCoord);
+    colortex0Out = texture(colortex0, texCoord);
     vec3 normal = texture(colortex1, texCoord).xyz * 2.0 - 1.0;
     vec2 lightmap = texture(colortex2, texCoord).rg;
     float depth = texture(depthtex0, texCoord).r;
@@ -82,6 +82,11 @@ void main() {
     vec3 shadow = getSoftShadow(shadowClipPos);
 
     // Lighting
+    float isNight = 0;
+    if(12000 < worldTime && worldTime < 13000) isNight = 1.0 - (13000 - worldTime) / 1000.0;
+    else if(13000 <= worldTime && worldTime <= 23000) isNight = 1;
+    else if(23000 < worldTime) isNight = (24000 - worldTime) / 1000.0;
+
     vec3 blocklight = blocklightColor * lightmap.r;
     vec3 skylight = skylightColor * lightmap.g;
     vec3 ambient = ambientColor;
@@ -90,6 +95,6 @@ void main() {
     float NdotL = dot(normal, lightDir);
     vec3 sunlight = sunlightColor * max(NdotL, 0.0) * shadow;
 
-    vec3 light = ambient + sunlight + skylight + blocklight; 
-    outColor.rgb *= light;
+    vec3 light = ambient + (sunlight + skylight) * (1 - isNight * 0.98) + blocklight; 
+    colortex0Out.rgb *= light;
 }
