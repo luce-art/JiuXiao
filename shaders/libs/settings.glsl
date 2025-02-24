@@ -12,7 +12,3 @@ const int shadowMapResolution = 2048; // [512 1024 2048 4096]
 
 // DEBUG
 const int noiseTextureResolution = 256; // [64 128 256 512 1024]
-
-const bool shadowtex0Nearest = true;
-const bool shadowtex1Nearest = true;
-const bool shadowcolor0Nearest = true;
