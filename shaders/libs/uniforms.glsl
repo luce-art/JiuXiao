@@ -13,6 +13,7 @@ uniform int renderStage;
 uniform int worldTime;
 uniform float viewHeight;
 uniform float viewWidth;
+uniform ivec2 eyeBrightnessSmooth;
 uniform vec3 upPosition;
 uniform vec3 skyColor;
 uniform vec3 fogColor;

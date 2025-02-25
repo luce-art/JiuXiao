@@ -8,7 +8,7 @@ in vec2 texCoord;
 #include "/libs/settings.glsl"
 /* DRAWBUFFERS:0 */
 layout (location = 0) out vec4 colortex0Out;
-const vec3 blocklightColor = vec3(1.0, 0.5, 0.08);
+const vec3 blocklightColor = vec3(1.0, 0.5, 0.20);
 const vec3 skylightColor = vec3(0.05, 0.15, 0.3);
 const vec3 sunlightColor = vec3(1.0);
 const vec3 ambientColor = vec3(0.03);
@@ -61,6 +61,11 @@ vec3 getSoftShadow(vec4 shadowClipPos){
   return shadowAccum / float(samples); 
 }
 
+float exposure(vec3 color, float factor) {
+  float skylight = float(eyeBrightnessSmooth.y) / 240;
+  return pow(skylight, 6.0) * factor + (1.0 - factor);
+}
+
 // Main
 void main() {
     colortex0Out = texture(colortex0, texCoord);
@@ -76,6 +81,7 @@ void main() {
     // Shadow
     vec3 viewPos = screenToView(texCoord, depth);
     vec3 feetPlayerPos = viewToFeetPlayer(viewPos);
+    vec3 eyePlayerPos = viewToEyePlayer(viewPos);
     vec3 shadowViewPos = feetPlayerToShadowView(feetPlayerPos);
     vec4 shadowClipPos = shadowProjection * vec4(shadowViewPos, 1.0);
 
@@ -95,6 +101,15 @@ void main() {
     float NdotL = dot(normal, lightDir);
     vec3 sunlight = sunlightColor * max(NdotL, 0.0) * shadow;
 
-    vec3 light = ambient + (sunlight + skylight) * (1 - isNight * 0.98) + blocklight; 
+    vec3 halfDir = normalize(lightDir - normalize(eyePlayerPos));
+    float NdotH = dot(normal, halfDir);
+    float spec = pow(max(NdotH, 0.0), 4.0);
+    vec3 specular = sunlightColor * spec * shadow;
+
+    vec3 light = ambient + (sunlight + skylight) * (1 - isNight * 0.98) + blocklight + specular * (1 - isNight * 0.9);
+    
     colortex0Out.rgb *= light;
+
+    // Exposure
+    colortex0Out.rgb /= exposure(colortex0Out.rgb, 0.7);
 }
